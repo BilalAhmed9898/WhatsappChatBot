@@ -1,0 +1,26 @@
+[
+  {
+    "companyId": "1",
+    "messageSent": "Company Data ",
+    "successfulUpdatesCount": 2,
+    "currentDate": "21/03/2024"
+  },
+  {
+    "companyId": 1,
+    "messageSent": "Company Data",
+    "successfulUpdatesCount": 6,
+    "currentDate": "03/05/2024"
+  },
+  {
+    "companyId": 1,
+    "messageSent": "Company Data",
+    "successfulUpdatesCount": 10,
+    "currentDate": "20/05/2024"
+  },
+  {
+    "companyId": 1,
+    "messageSent": "Company Data",
+    "successfulUpdatesCount": 31,
+    "currentDate": "29/06/2024"
+  }
+]

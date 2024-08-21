@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Style for the first column (ID) */
+        th:first-child,
+        td:first-child {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Style for the second column (Message) */
+        th:nth-child(2),
+        td:nth-child(2) {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        /* Style for the third column (Status) */
+        th:nth-child(3),
+        td:nth-child(3) {
+            background-color: #f44336;
+            color: white;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            background-color: #3698f4;
+            color: black;
+        }
+
+        /* Style for the button */
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input {
+            outline: none;
+            margin: 10px;
+            padding: 10px;
+            border-color: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" placeholder="CompanyId" id="CompanyId">
+    <input type="text" placeholder="What'sapp Number" id="number" maxlength="11">
+    <button onclick="PinValidation()">Pin Session (2)</button>
+    <button onclick="DeleteSession()">Delete Session (1)</button>
+
+    <textarea name="" id="links" style="display: block;" cols="100" rows="30"></textarea>
+    <span id="password"></span>
+    <img id="screenshot" alt="QR Code Screenshot" width="580px" height="480px" >
+
+    <!-- <button onclick="collectData()" id="collectData">Collect Data (2)</button> -->
+    <button onclick="collectData1()" id="collectData">Collect Data (2)</button>
+    <button onclick="SessionValidation()">Validate Session (1) </button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+          $(document).ready(function() {
+            var collectData = document.getElementById('collectData')
+            var screenshot = document.getElementById('screenshot')
+            screenshot.style.display='none'
+        })
+          async function DeleteSession() {
+            var companyId = document.getElementById('CompanyId').value;
+            console.log(companyId);
+            if (companyId !== "") {
+                try {
+                    const response = await fetch('http://110.93.236.170:8082/DeleteSession', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ companyId: companyId }),
+                    });
+                    const responseData = await response.json();
+                    console.log('Server Respons e:', responseData);
+                } catch (error) {
+                    console.error('Error sending data to backend:', error);
+                }
+            } else {
+                alert("Id Must be Number!");
+            }
+        }
+        async function PinValidation() {
+            var companyId = document.getElementById('CompanyId').value;
+            var Number = document.getElementById('number').value;
+
+            if (companyId !== "" && Number !== "" ) {
+                try {
+                    const response = await fetch('http://110.93.236.170:8082/PinValidation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ companyId: companyId , cellNumber : Number }),
+                    });
+
+                    const responseData = await response.json();
+
+                    console.log('Server Response:', responseData.Data);
+
+                     var Result = responseData.Data.toString();
+                     var password = document.getElementById('password')
+                     
+                      password.innerText= `Whats'app Pin  = ${Result} `;
+
+                    if (responseData.message === 'QR code found. Waiting for scanning...') {
+                        const screenshotImg = document.getElementById('screenshot');
+                        screenshotImg.style.display = 'inline';
+                        screenshotImg.src = `data:image/png;base64, ${responseData.qrCodeScreenshot}`;
+                    }
+                    if (responseData.message === 'Hello World! Chats element found.') {
+                        const collectData = document.getElementById('collectData');
+                        collectData.style.display = 'inline';
+                        const collectDataInput = $('#CompanyId');
+                        collectDataInput.prop('disabled', true);
+                    }
+                    if (responseData.message === 'Please Try Again') {
+                        const screenshotImg = document.getElementById('screenshot');
+                        screenshotImg.style.display = 'none';
+                        alert("Please Try Again !")
+                    }
+                } catch (error) {
+                    console.error('Error sending data to backend:', error);
+                }
+            } else {
+                alert("Id Must be Number!");
+            }
+        }
+        
+        async function SessionValidation() {
+            var companyId = document.getElementById('CompanyId').value;
+            console.log(companyId);
+
+            if (companyId !== "") {
+                try {
+                    const response = await fetch('http://110.93.236.170:8082/SessionValidation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ companyId: companyId }),
+                    });
+
+                    const responseData = await response.json();
+
+                    console.log('Server Response:', responseData);
+
+                    if (responseData.message === 'QR code found. Waiting for scanning...') {
+                        const screenshotImg = document.getElementById('screenshot');
+                        screenshotImg.style.display = 'inline';
+                        screenshotImg.src = `data:image/png;base64, ${responseData.qrCodeScreenshot}`;
+                    }
+                    if (responseData.message === 'Hello World! Chats element found.') {
+                        const collectData = document.getElementById('collectData');
+                        collectData.style.display = 'inline';
+                        const collectDataInput = $('#CompanyId');
+                        collectDataInput.prop('disabled', true);
+                    }
+                    if (responseData.message === 'Please Try Again') {
+                        const screenshotImg = document.getElementById('screenshot');
+                        screenshotImg.style.display = 'none';
+                        alert("Please Try Again !")
+                    }
+                } catch (error) {
+                    console.error('Error sending data to backend:', error);
+                }
+            } else {
+                alert("Id Must be Number!");
+            }
+        }
+
+        async function collectData() {
+            var companyId = document.getElementById('CompanyId').value;
+            var Number = document.getElementById('number').value;
+       
+            const dataArray = [];
+            var tableRows = document.querySelectorAll('tbody tr');
+
+            tableRows.forEach(function (row) {
+                var rowData = {
+                    ID: row.cells[0].textContent,
+                    cellNumber: row.cells[1].textContent,
+                    Message: row.cells[2].textContent,
+                    GroupName: row.cells[3].textContent,
+                    Status: row.cells[4].textContent,
+                };
+                dataArray.push(rowData);
+            });
+
+            const requestData = {
+                companyId: companyId,
+                dataArray: dataArray,
+                cellNumber : Number
+            };
+
+            console.log(requestData);
+
+            if(companyId !=="" && Number.length == 11){
+                try {
+                const response = await fetch('http://110.93.236.170:8082/tableData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                const result = await response.json();
+                if (result) {
+                    console.log(result);
+
+                    $('#tbody').empty();
+                    result.updatedArray.forEach(item => {
+                        $('#tbody').append(`
+                <tr>
+                    <td>${item.ID}</td>
+                    <td>${item.cellNumber}</td>
+                    <td>${item.Message}</td>
+                    <td>${item.GroupName}</td>
+                    <td>${item.Status}</td>
+                </tr>
+                `);
+                    });
+                    console.log(result.updatedArray);
+                }
+                console.log('Server Response:', result);
+            } catch (error) {
+                console.error('Error sending data to backend:', error);
+            }
+            }else{
+                alert("Please Enter Valid Id and Number")
+
+            }
+        }
+        async function collectData1() {
+
+            var Number = document.getElementById('number').value;
+            var companyId = document.getElementById('CompanyId').value;
+            var textarea = document.getElementById('links');
+            
+            var linksText = textarea.value;
+            var linksArray = linksText.split(','); 
+            console.log(linksArray);
+
+            const requestData = {
+                companyId: companyId,
+                Number: Number,
+                dataArray: linksArray,
+            };
+            if(linksArray.length>0){
+                try {
+                const response = await fetch('http://110.93.236.170:8082/grouplinks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                const result = await response.json();
+                if (result) {
+                    console.log('Server Response:', result);
+                }
+            } catch (error) {
+                console.error('Error sending data to backend:', error);
+            }
+            }else{
+                alert("Please Enter Valid Id and Number")
+            }
+        }
+    </script>
+
+</body>
+
+</html>

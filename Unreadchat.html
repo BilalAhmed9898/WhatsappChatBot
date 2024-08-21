@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, 
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Style for the first column (ID) */
+        th:first-child,
+        td:first-child {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Style for the second column (Message) */
+        th:nth-child(2),
+        td:nth-child(2) {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        /* Style for the third column (Status) */
+        th:nth-child(3),
+        td:nth-child(3) {
+            background-color: #f44336;
+            color: white;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            background-color: #3698f4;
+            color: black;
+        }
+
+        /* Style for the button */
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input {
+            outline: none;
+            margin: 10px;
+            padding: 10px;
+            border-color: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" placeholder="CompanyId" id="CompanyId" value="1">
+    <button onclick="Unreadmsgs()">Unreadmsgs</button>
+    <button onclick="SendImageToMulti()">SendImageToMulti</button>
+    <script>
+      const phoneNumbers = [
+  { phoneNumber: "03117966525" },
+  { phoneNumber: "03068373530" },
+ 
+    ];
+
+console.log(phoneNumbers);
+
+        async function SendImageToMulti() {
+            var companyId = document.getElementById('CompanyId').value;
+            const requestData = {
+                companyId: companyId,
+                msg: " Hello Msg testing !",
+                phoneNumbers: phoneNumbers,
+            };
+            console.log(requestData);
+
+            if(companyId !==""){
+                try {
+                const response = await fetch('http://localhost:8010/SendImageToMulti', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                const result = await response.json();
+               
+                console.log('Server Response:', result);
+            } catch (error) {
+                console.error('Error sending data to backend:', error);
+            }
+            }else{
+                alert("Please Enter Valid Id and Number")
+
+            }
+        }
+    </script>
+    <script>
+      
+        async function Unreadmsgs() {
+            var companyId = document.getElementById('CompanyId').value;
+            const requestData = {
+                companyId: companyId,
+            };
+            console.log(requestData);
+
+            if(companyId !==""){
+                try {
+                const response = await fetch('http://localhost:8010/UnreadChats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                const result = await response.json();
+               
+                console.log('Server Response:', result);
+            } catch (error) {
+                console.error('Error sending data to backend:', error);
+            }
+            }else{
+                alert("Please Enter Valid Id and Number")
+
+            }
+        }
+    </script>
+
+</body>
+
+</html>

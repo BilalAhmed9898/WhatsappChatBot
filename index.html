@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>card</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+</head>
+
+<body>
+    <div class="main-container" id="card">
+        <div class="container">
+            <div class="shape1"></div>
+            <div class="shape2">
+                <h1 id="txtcmp"></h1>
+            </div>
+            <div class="shape3"> </div>
+            <div class="logo">
+                <img src="" id="targetImage" crossorigin="anonymous">
+            </div>
+            <div class="box">
+                <div class="image">
+                    <img src="images/man-avatar-profile-picture-vector-illustration_268834-541.avif" >
+                </div>
+                <div class="para">
+                    <p id="p1"><label id="label1">Grno: </label><label id="txtgrno"></label></p>
+                    <p id="p2"><label id="label1">Name: </label><label id="txtname"></label></p>
+                    <p id="p3"><label id="label1">Father Name: </label><label id="txtfname"></label></p>
+                    <p id="p4"><label id="label1">Class: </label><label id="txtclass"></label></p>
+                </div>
+            </div>
+
+            <div class="shape4">
+                <h4 id="txtaddress">Address: </h4>
+                <h5 id="txtph">phone: </h5>
+            </div>
+            <div class="shape5"></div>
+            <div class="shape6"></div>
+        </div>
+        <div class="container2">
+            <div class="shape7"></div>
+            <div class="shape8">
+                <h1>Terms And Counditions</h1>
+            </div>
+            <div class="shape9"></div>
+            <div class="para2" id="txtpara">
+
+            </div>
+
+            <div class="box2">
+                <div class="para3">
+                    <p id="p1"><label>Phone: </label><label id="txtph1"></label></p>
+                    <p id="p1"><label>Address: </label><label id="txtaddress2"></label></p>
+                </div>
+                <div class="shape10">
+                    <img src="" id="targetImage1" crossorigin="anonymous">
+                    <!-- <img src="images/istockphoto-1095468748-612x612.jpg"> -->
+                </div>
+                <div class="shape11"></div>
+                <div class="shape12"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container3">
+        <button id="download" onclick="generateAndRun()">Download Image</button>
+    </div>
+
+
+
+    <script>
+        $(document).ready(function () {
+            var stdid = 3902
+            loaddata(stdid);
+        });
+
+        function loaddata(stdid) {
+            $.ajax({
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+                    xhr.setRequestHeader("Access-Control-Allow-Credentials ", "true");
+                    xhr.setRequestHeader("Content-Type",
+                        "application/jsonp; charset=utf-8");
+                    xhr.setRequestHeader("Accept", "application/jsonp");
+                },
+                type: "GET",
+                url: 'http://sms1.logicslabs.com/Card/Getstddet',
+                contentType: "application/jsonp",
+                traditional: true,
+                data: { stdid: stdid },
+                dataType: "jsonp",
+                headers: {
+                    'Access-Control-Allow-Origin': '*'
+                }, xhrFields: { withCredentials: true },
+                success: function (recData) {
+                    if (recData.status == "success") {
+                        $('#txtgrno').append(recData.Data.grno);
+                        $('#txtname').append(recData.Data.name);
+                        $('#txtfname').append(recData.Data.fname);
+                        $('#txtclass').append(recData.Data.Class);
+                        $('#txtcmp').append(recData.comp.companyName);
+                        $('#txtaddress').append(recData.comp.Address);
+                        $('#txtph').append(recData.comp.CellNumber1);
+                        $('#txtph1').append(recData.comp.CellNumber1);
+                        $('#txtaddress2').append(recData.comp.Address);
+                        $('#targetImage').append(recData.comp.Complogo);
+                        $('#targetImage1').append(recData.comp.Complogo);
+
+                        var dataArray = recData.lstnotes;
+
+                        var paraDiv = document.getElementById("txtpara");
+
+                        var ulElement = document.createElement("ul");
+
+                        dataArray.forEach(function (item) {
+                            var liElement = document.createElement("li");
+                            liElement.textContent = item;
+
+                            ulElement.appendChild(liElement);
+                        });
+
+                        paraDiv.appendChild(ulElement);
+
+                        if (recData.pdfUrl != "") {
+                            var target = document.getElementById("targetImage");
+                            target.src = recData.pdfUrl;
+                            var target1 = document.getElementById("targetImage1");
+                            target1.src = recData.pdfUrl;
+                        }
+                    }
+                    else {
+                        swal({
+                            title: "Error",
+                            text: recData.Data,
+                            icon: "error",
+                        });
+                    }
+
+                },
+                error: function (responseData, textStatus, errorThrown) {
+                    swal({
+                        title: "Error",
+                        text: responseData.statusText,
+                        icon: "error",
+                    });
+                }
+            });
+        }
+
+    </script>
+<!-- <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.js"></script>
+<script src="https://unpkg.com/html2canvas@0.5.0/dist/html2canvas.js"></script> -->
+
+
+<script>
+    async function generateAndRun() {
+        const card = document.getElementById("card");
+
+        if (!window.html2pdf || !window.html2canvas) {
+            console.error('html2pdf or html2canvas not found. Make sure to include the libraries.');
+            return;
+        }
+
+        var opt = {
+            margin: 1,
+            filename: 'myfile.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'letter', orientation: 'landscape', output: 'blob' }
+        };
+
+        try {
+    
+            const pdfBlob = await window.html2pdf().from(card).set(opt).outputPdf();
+
+            const formData = new FormData();
+            formData.append('pdfData', new Blob([pdfBlob], { type: 'application/pdf' }));
+            console.log(formData);
+
+            const response = await fetch('http://localhost:3003/trigger-whatsapp', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.text();
+            console.log(result);
+        } catch (error) {
+            console.error('Error triggering WhatsApp automation:', error);
+        }
+    }
+</script>
+
+
+
+</body>
+
+</html>

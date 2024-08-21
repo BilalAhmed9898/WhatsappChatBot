@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Style for the first column (ID) */
+        th:first-child,
+        td:first-child {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Style for the second column (Message) */
+        th:nth-child(2),
+        td:nth-child(2) {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        /* Style for the third column (Status) */
+        th:nth-child(3),
+        td:nth-child(3) {
+            background-color: #f44336;
+            color: white;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            background-color: #3698f4;
+            color: black;
+        }
+
+        /* Style for the button */
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input {
+            outline: none;
+            margin: 10px;
+            padding: 10px;
+            border-color: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" placeholder="CompanyId" id="CompanyId">
+    <button onclick="SessionValidation()">Create Session </button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Message</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr>
+                <td>03068373530</td>
+                <td>Sample Message 1</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>03037529997</td>
+                <td>Sample Message 1</td>
+                <td>0</td>
+            </tr>
+            <!-- <tr>
+                <td>03068373530</td>
+                <td>Sample Message 1</td>
+                <td>0</td>
+            </tr> -->
+
+        </tbody>
+    </table>
+    <img id="screenshot" alt="QR Code Screenshot" width="500px" height="400px">
+
+    <button onclick="collectData()" id="collectData">Collect Data</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+          $(document).ready(function() {
+            var collectData = document.getElementById('collectData')
+            var screenshot = document.getElementById('screenshot')
+            screenshot.style.display='none'
+            collectData.style.display='none'
+          })
+        async function SessionValidation() {
+            var companyId = document.getElementById('CompanyId').value;
+            console.log(companyId);
+
+            if (companyId !== "") {
+                try {
+                    const response = await fetch('http://110.93.236.170:8082/SessionValidation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ companyId: companyId }),
+                    });
+
+                    const responseData = await response.json();
+
+                    console.log('Server Response:', responseData);
+
+                    if (responseData.message === 'QR code found. Waiting for scanning...') {
+                        const screenshotImg = document.getElementById('screenshot');
+                        screenshotImg.style.display = 'inline';
+                        screenshotImg.src = `data:image/png;base64, ${responseData.qrCodeScreenshot}`;
+                    }
+                    if (responseData.message === 'Hello World! Chats element found.') {
+                        const collectData = document.getElementById('collectData');
+                        collectData.style.display = 'inline';
+                    //     const collectDataInput = $('#CompanyId');
+                    // collectDataInput.prop('disabled', true);
+                    }
+
+                } catch (error) {
+                    console.error('Error sending data to backend:', error);
+                }
+
+            } else {
+                alert("Id Must be Number!");
+            }
+        }
+
+        async function collectData() {
+            var companyId = document.getElementById('CompanyId').value;
+            console.log(companyId);
+            const dataArray = [];
+            var tableRows = document.querySelectorAll('tbody tr');
+
+            tableRows.forEach(function (row) {
+                var rowData = {
+                    ID: row.cells[0].textContent,
+                    Message: row.cells[1].textContent,
+                    Status: row.cells[2].textContent,
+                };
+                dataArray.push(rowData);
+            });
+
+            const requestData = {
+                companyId: companyId,
+                dataArray: dataArray,
+            };
+
+            console.log(requestData);
+
+            try {
+                const response = await fetch('http://110.93.236.170:8082/tableData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                const result = await response.json();
+                if (result) {
+                    console.log(result);
+
+                    $('#tbody').empty();
+                    result.updatedArray.forEach(item => {
+                        $('#tbody').append(`
+                <tr>
+                    <td>${item.ID}</td>
+                    <td>${item.Message}</td>
+                    <td>${item.Status}</td>
+                </tr>
+            `);
+                    });
+                    console.log(result.updatedArray);
+                }
+                console.log('Server Response:', result);
+            } catch (error) {
+                console.error('Error sending data to backend:', error);
+            }
+
+        }
+    </script>
+
+</body>
+
+</html>

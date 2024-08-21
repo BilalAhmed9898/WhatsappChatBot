@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <title>Send Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin: 10px;
+    }
+    h1 {
+      color: #333;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    input[type="file"] {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<body>
+  <div class="container" style="display: flex; flex-direction: column; gap: 20px;">
+    <h1>Send Image Test</h1>
+    <input type="text" id="cellnumber" placeholder="cellnumber" value="03068373530" style="padding: 10px;" />
+    <input type="text" id="compid" placeholder="compid" value="1" style="padding: 10px;" />
+    <button onclick="SendClientImage()">Send Client Image</button>
+    <div class="message" id="message1"></div>
+  </div>
+  <div class="container" style="display: flex; flex-direction: column; gap: 20px;">
+    <h1>Save Image at Backend</h1>
+    <input type="file" id="fileInput" accept="image/*" />
+    <button onclick="sendImage()">Send Image</button>
+    <div class="message" id="message"></div>
+  </div>
+  <div class="container" style="display: flex; flex-direction: column; gap: 20px;">
+    <h1>Save File at Backend</h1>
+    <input type="file" id="fileInput1"/>
+    <button onclick="SendFile()">Send File</button>
+    <div class="message" id="message2"></div>
+  </div>
+  <script>
+    function convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          // Convert to Base64 string
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function sendImage() {
+      const fileInput = document.getElementById('fileInput');
+      const messageDiv = document.getElementById('message');
+
+      if (fileInput.files.length === 0) {
+        messageDiv.textContent = 'Please select a file.';
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      try {
+        const base64Image = await convertFileToBase64(file);
+        const payload = { image: base64Image };
+        console.log(payload);
+
+        const response = await fetch('http://localhost:8011/receiveimages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+
+        const data = await response.json();
+        messageDiv.textContent = 'Response from server: ' + JSON.stringify(data.message);
+      } catch (error) {
+        messageDiv.textContent = 'Error sending image: ' + error.message;
+      }
+    }
+    
+    async function SendFile() {
+            const fileInput = document.getElementById('fileInput1');
+            const messageDiv = document.getElementById('message2');
+
+            if (fileInput.files.length === 0) {
+                messageDiv.textContent = 'Please select a file.';
+                return;
+            }
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:8011/SendFile', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const data = await response.json();
+                messageDiv.textContent = 'Response from server: ' + JSON.stringify(data.message);
+            } catch (error) {
+                messageDiv.textContent = 'Error sending file: ' + error.message;
+            }
+        }
+
+    
+    async function SendClientImage() {
+
+      var Number = document.getElementById('cellnumber').value;
+      var companyId = document.getElementById('compid').value;
+
+      const requestData = {
+          companyId: companyId,
+          Number: Number,
+      };
+       try {
+       const response = await fetch('http://localhost:8011/SendImage', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(requestData),
+       });
+
+       const result = await response.json();
+       if (result) {
+           console.log('Server Response:', result);
+       }
+      } catch (error) {
+          console.error('Error sending data to backend:', error);
+      }
+
+      }
+  </script>
+</body>
+</html>

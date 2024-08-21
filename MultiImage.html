@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Three Sections Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: #fff;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .section {
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .section h3 {
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        ul li {
+            background-color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+        }
+
+        a {
+            display: block;
+            margin-bottom: 15px;
+            padding: 10px;
+            text-decoration: none;
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        a:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            outline: none;
+            resize: none;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        button {
+            grid-column: span 3;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #2575fc;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1e60c7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="section">
+            <h3>List of Numbers</h3>
+            <ul id="numberList">
+                <li>03068373530</li>
+                <li>03161252650</li>
+                <li>03158231640</li>
+                <li>03117966525</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h3>Useful Links</h3>
+            <a href="https://app10.wasooli.pk/assets/images/others/POINTOFSALE-04.jpg" target="_blank" class="link">https://app10.wasooli.pk/assets/images/others/POINTOFSALES-04.jpg</a>
+            <a href="https://app10.wasooli.pk/assets/images/others/MARKETINGSOFTWARE-01.jpg" target="_blank" class="link">https://app10.wasooli.pk/assets/images/others/MARKETINGSOFTWARE-01.jpg</a>
+            <a href="https://media.istockphoto.com/id/2149530993/photo/digital-human-head-concept-for-ai-metaverse-and-facial-recognition-technology.jpg?s=612x612&w=is&k=20&c=3kc8VA4yevndMaytITTxYjwc7LV_0WxWePwvF4W4vkc=" target="_blank" class="link">https://media.istockphoto.com/id/2149530993/photo/digital-human-head-concept-for-ai-metaverse-and-facial-recognition-technology.jpg?s=612x612&w=is&k=20&c=3kc8VA4yevndMaytITTxYjwc7LV_0WxWePwvF4W4vkc=</a>
+            <a href="http://http://localhost:8011/Photo/pic_20240819.png" target="_blank" class="link">https://media.istockphoto.com/id/2149530993/photo/digital-human-head-concept-for-ai-metaverse-and-facial-recognition-technology.jpg?s=612x612&w=is&k=20&c=3kc8VA4yevndMaytITTxYjwc7LV_0WxWePwvF4W4vkc=</a>
+        </div>
+        <div class="section">
+            <h3>Leave a Comment</h3>
+            <textarea placeholder="Write your comment here... " id="msg" value="testing"></textarea>
+        </div>
+        <div class="section">
+            <h3>Contact Number</h3>
+            <input type="text" placeholder="Contact Number" id="GroupName" value="03068373530">
+        </div>
+        <button onclick="SendImageToMulti()">Get Numbers and Links</button>
+    </div>
+
+    <script>
+        async function appendLinks() {
+            try {
+                const response = await fetch('/Message/SendImageToMulti', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to fetch links from the server.');
+                }
+    
+                const result = await response.json();
+    
+                // Assuming `result` contains an array of link objects in the format { href: 'link', text: 'display text' }
+                const section = document.querySelector('.section');
+    
+                result.forEach(link => {
+                    const anchor = document.createElement('a');
+                    anchor.href = link.href;
+                    anchor.textContent = link.text;
+                    anchor.target = '_blank';
+                    anchor.className = 'link';
+                    section.appendChild(anchor);
+                });
+    
+            } catch (error) {
+                console.error('Error fetching and appending links:', error);
+            }
+        }
+    
+        function setTextareaValue() {
+            const textarea = document.getElementById('msg');
+            textarea.value = 'Hello client Name, testing Message!';
+        }
+    
+        async function SendImageToMulti() {
+            const msg = document.getElementById('msg').value;
+            const numberListItems = document.querySelectorAll('#numberList li');
+            const numbers = Array.from(numberListItems).map(item => item.textContent);
+    
+            const linkElements = document.querySelectorAll('.link');
+            const links = Array.from(linkElements).map(link => link.href);
+    
+            const groupNumber = document.getElementById('GroupName').value;
+    
+            const data = {
+                companyId: 1,
+                msg: msg,
+                numbers: numbers,
+                imageLinks: links,
+                GroupNumber: groupNumber
+            };
+            console.log(data);
+    
+            if (numbers.length > 0 && links.length > 0) {
+                try {
+                    const response = await fetch('http://localhost:8011/SendImageToMulti', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error('Failed to send data to the server.');
+                    }
+    
+                    const result = await response.json();
+    
+                    console.log('Server Response:', result);
+                } catch (error) {
+                    console.error('Error sending data to backend:', error);
+                }
+            } else {
+                alert("Please enter a valid message, numbers, and links.");
+            }
+        }
+        appendLinks();
+        setTextareaValue();
+    </script>
+    </body>
+
+</html>
